@@ -69,20 +69,66 @@ def show_scatter_plot(dataset, feature1, feature2):
 	plt.show()
 
 # identify outliers
-show_scatter_plot(data_dict, "salary", "bonus")
+# show_scatter_plot(data_dict, "salary", "bonus")
 
 # remove them
 data_dict.pop( "TOTAL", 0 )
-show_scatter_plot(data_dict, "salary", "bonus")
+# show_scatter_plot(data_dict, "salary", "bonus")
 
 
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
 my_dataset = data_dict
 
+# create new features
+def computeFraction(poi_messages, all_messages):
+	""" given a number messages to/from POI (numerator) 
+	and number of all messages to/from a person (denominator),
+	return the fraction of messages to/from that person
+	that are from/to a POI
+	"""
+	fraction = 0
+	if poi_messages != 'NaN' and all_messages != 'NaN':
+		fraction = poi_messages/float(all_messages)
+
+   	return fraction
+
+def takeSecond(elem):
+	""" take second element for sort
+	"""
+	return elem[1]
+
+for emp in my_dataset:
+	from_poi_to_this_person = my_dataset[emp]['from_poi_to_this_person']
+	to_messages = my_dataset[emp]['to_messages']
+	fraction_from_poi = computeFraction(from_poi_to_this_person, to_messages)
+	# print fraction_from_poi
+	my_dataset[emp]['fraction_from_poi'] = fraction_from_poi
+
+	from_this_person_to_poi = my_dataset[emp]['from_this_person_to_poi']
+	from_messages = my_dataset[emp]['from_messages']
+	fraction_to_poi = computeFraction(from_this_person_to_poi, from_messages)
+	my_dataset[emp]['fraction_to_poi'] = fraction_to_poi
+
+features_list_n = total_features
+features_list_n.remove('email_address')
+features_list_n =  features_list_n + ['fraction_from_poi', 'fraction_to_poi']
+print features_list_n
+
 ### Extract features and labels from dataset for local testing
-data = featureFormat(my_dataset, features_list, sort_keys = True)
+data = featureFormat(my_dataset, features_list_n, sort_keys = True)
 labels, features = targetFeatureSplit(data)
+
+# intelligently select features (univariate feature selection)
+from sklearn.feature_selection import SelectKBest, f_classif
+selector = SelectKBest(f_classif, k = 10)
+selector.fit(features, labels)
+scores = zip(features_list_n[1:], selector.scores_)
+sorted_scores = sorted(scores, key = takeSecond, reverse = True)
+print 'SelectKBest scores: ', sorted_scores
+
+kBest_features = POI_label + [(i[0]) for i in sorted_scores[0:10]]
+print 'KBest', kBest_features
 
 ### Task 4: Try a varity of classifiers
 ### Please name your classifier clf for easy export below.
