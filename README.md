@@ -7,8 +7,8 @@ The purpose of this project is to use machine learning tools to identify Enron e
 
 > 1. Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those?  [relevant rubric items: “data exploration”, “outlier investigation”]
 
-⋅⋅*
-  ### Dataset Background
+
+  * ### Dataset Background
 
 The dataset contains about 146 users (18 of them are considered POIs, while 128 are non-POIs) mostly real emails exchanged by senior management of Enron. We can use machine learning on this dataset to answer questions like "can we identify patterns in the emails?", using regression we will be able to understand the relationship between the people's salary and their bonuses for example, and using clustering we can identify who was a member of the board of directors, and who is just an employee.
 
@@ -48,8 +48,7 @@ Some features have many missing values `NaN`s. Below is a list that shows each f
 A possible fix for the missing values is to replace them with 0s.
 
 
-⋅⋅*
-  ### Outliers
+  * ### Outliers
 
 When I plotted bonus vs. salary, there was an outlier datapoint representing the 'TOTAL' column. I removed it as it's a spreadsheet quirk.
 
@@ -93,8 +92,7 @@ for emp in my_dataset:
 	my_dataset[emp]['fraction_to_poi'] = fraction_to_poi
 ```
 
-⋅⋅*
-  ### Univariate Feature Selection
+  * ### Univariate Feature Selection
 
 In order to decide the best features to use, I utilized an automated feature selection function, i.e. SelectKBest, which selects the K features that are most powerful (where K is a parameter). The function returned the below scores for all the features.
 
@@ -132,8 +130,7 @@ I decided to take the first 10 features (k = 10) along with POI as they obtained
 ```
 
 
-⋅⋅*
-  ### Feature Scaling
+  * ### Feature Scaling
 
 Since my selected features had different units and some of the features had very big values, I needed to transform them. I used MinMaxScaler from sklearn to scale all my selected features to a given range (between 0 and 1).
 
@@ -152,29 +149,23 @@ features = scaler.fit_transform(features)
 > 3. What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?  [relevant rubric item: “pick an algorithm”]
 
 I tried 5 different algorithms and ended up using `Naive Bayes` as it scored the highest evaluation metrics. Other algorithms that I tried are:
-
-	- SVM
-	- Decision Tree
-	- Random Forest
-	- Logistic Regression.
-	
+  - SVM
+  - Decision Tree
+  - Random Forest
+  - Logistic Regression
 In general, it took longer to run SVM and Logistic Regression models. Also, I noticed that all algorithms scored high accuracy, which is an indication that accuracy in this case is not the best evaluation metric as one of its shortcoming that it's not ideal for skewed classes (which is the case in our enron dataset).
 
 > 4. What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?  How did you tune the parameters of your particular algorithm? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier).  [relevant rubric item: “tune the algorithm”]
 
 Most classifiers come with a set of parameters (with default values) which affect the model, and are passed as arguments to the constructor. Typical examples include `C`, `kernel` and `gamma` for SVM Classifier for example. Tuning the parameters of a classifier (usually referred to as hyperparameters) means to optimize the values of those parameters to enable the algorithm to perform its best (Hyperparameter Optimization). It's a final step in the process of applied machine learning before presenting results. If this step is not done well, it can lead to the model misfitting the data.
 
-⋅⋅*
-  ### Algorithm Tuning
+  * ### Algorithm Tuning
 
 I used GridSearchCV from sklearn for parameter tuning in the algorithms that had parameters (SVM, Decision Tree, and Logistic Regression). Grid search is an approach to parameter tuning that will methodically build and evaluate a model for each combination of algorithm parameters specified in a grid.
 
 
+I created the below function to tune the algorithm using grid search. It prints out the best hyperparameters for the model after performing the tuning for 80 iterations, along with the average evaluation metrics results (accuracy, percision, recall).
 
-given a grid_search and parameters list (if exist) for a specific model, along with features and labels list,
-it tunes the algorithm using grid search and prints out the average evaluation metrics results (accuracy, percision, recall) after performing the tuning for iter times, and the best hyperparameters for the model
-
-	
 ```python
 def tune_params(grid_search, features, labels, params, iters = 80):
     acc = []
@@ -198,26 +189,7 @@ def tune_params(grid_search, features, labels, params, iters = 80):
         print("%s = %r, " % (param_name, best_params[param_name]))
 ```
 
-
-**SVM **
-
-```python
-from sklearn import svm
-svm_clf = svm.SVC()
-svm_param = {'kernel':('linear', 'rbf', 'sigmoid'),
-'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
-'C': [0.1, 1, 10, 100, 1000]}
-svm_grid_search = GridSearchCV(estimator = svm_clf, param_grid = svm_param)
-
-tune_params(svm_grid_search, features, labels, svm_param)
-```
-**Result**
-kernel = 'rbf', 
-C = 1000, 
-gamma = 0.01, 
-
-
-**Decision Tree**
+**Tuning Support Vector Classification**
 
 ```python
 from sklearn import svm
@@ -229,29 +201,73 @@ svm_grid_search = GridSearchCV(estimator = svm_clf, param_grid = svm_param)
 
 tune_params(svm_grid_search, features, labels, svm_param)
 ```
-
 **Result**
-splitter = 'random', 
-criterion = 'gini', 
 
-**Logistic Regression model evaluation**
+kernel = 'rbf', C = 1000, gamma = 0.01
 
+
+**Tuning Decision Tree Classification**
 
 ```python
+from sklearn import tree
+dt_clf = tree.DecisionTreeClassifier()
+dt_param = {'criterion':('gini', 'entropy'),
+'splitter':('best','random')}
+dt_grid_search = GridSearchCV(estimator = dt_clf, param_grid = dt_param)
+
+tune_params(dt_grid_search, features, labels, dt_param)
 ```
 
 **Result**
-C = 0.1, 
-tol = 1,
+
+splitter = 'random', criterion = 'gini'
+
+
+**Tuning Logistic Regression Classification**
+
+
+```python
+from sklearn.linear_model import LogisticRegression
+lr_clf = LogisticRegression()
+lr_param = {'tol': [1, 0.1, 0.01, 0.001, 0.0001],
+'C': [0.1, 0.01, 0.001, 0.0001]}
+lr_grid_search = GridSearchCV(estimator = lr_clf, param_grid = lr_param)
+
+tune_params(lr_grid_search, features, labels, lr_param)
+```
+
+**Result**
+
+C = 0.1, tol = 1
 
 
 ## Validate and Evaluate
 
 > 5. What is validation, and what’s a classic mistake you can make if you do it wrong? How did you validate your analysis?  [relevant rubric item: “validation strategy”]
 
+Validation is the process where a trained model is evaluated with a testing dataset. The classic mistake in validation process is not splitting your data to training/testing datasets, which leads to overfitting. I used Cross Validation train_test_split function to split 30% of my dataset as for testing. then I used sklearn.metrics accuracy, precision and recall scores to validate my algorithms.
 
-The classic mistake is not splitting your data to training/testing datasets.
- 
+```python
+from sklearn.cross_validation import train_test_split
+eatures_train, features_test, labels_train, labels_test = \
+        train_test_split(features, labels, test_size = 0.3, random_state = 42)
+	
+from sklearn.metrics import accuracy_score, precision_score, recall_score
+accuracy_score(labels_test, predicts)
+precision_score(labels_test, predicts)
+recall_score(labels_test, predicts)
+```
+
+The table below shows the results for the chosen algorithms.
+
+| Algorithm | accuracy | precision | recall |
+| ----------| -------- | --------- | ------ |
+|Naive Bayes| 0.84659 | 0.395065 | 0.3348065 |
+|Support Vector Machines|0.86846|0.15416|0.0602728|
+|Decision Tree|0.81960|0.28101|0.300833|
+|Random Forest|0.86875|0.38770|0.16695|
+|Logistic Regression|0.8752|0.0|0.0|
+
 
 > 6. Give at least 2 evaluation metrics and your average performance for each of them.  Explain an interpretation of your metrics that says something human-understandable about your algorithm’s performance. [relevant rubric item: “usage of evaluation metrics”]
 
@@ -259,6 +275,7 @@ Recall: True Positive / (True Positive + False Negative). Out of all the items t
 
 Precision: True Positive / (True Positive + False Positive). Out of all the items labeled as positive, how many truly belong to the positive class.
 
+The chosen algorithm is `Naive Bayes`, which resulted in `precision of 0.395065` and `recall of 0.3348065`
 
 
 ---
@@ -269,4 +286,5 @@ References:
 - [2] https://datascience.stackexchange.com/questions/10773/how-does-selectkbest-work
 - [3] http://machinelearningmastery.com/how-to-tune-algorithm-parameters-with-scikit-learn/
 - [4] https://en.wikipedia.org/wiki/Hyperparameter_optimization
+- [5] https://en.wikipedia.org/wiki/Cross-validation_(statistics)
 
