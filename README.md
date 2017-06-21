@@ -46,12 +46,14 @@ Some features have many missing values `NaN`s. Below is a list that shows each f
 A possible fix for the missing values is to replace them with 0s.
 
 
-> Outlier in the dataset
+> Outliers in the dataset
 
 When I plotted bonus vs. salary, there was an outlier datapoint representing the 'TOTAL' column. I removed it as it's a spreadsheet quirk.
+
 ![scatter plot1](https://github.com/jasminej90/dand5-identity-fraud-from-enron-email/blob/master/img/scatterp1.png)
 
 After removing the outlier, the scatterplot spread is clearer now as it was skewed earlier due to the effect of the outlier.
+
 ![scatter plot2](https://github.com/jasminej90/dand5-identity-fraud-from-enron-email/blob/master/img/scatterp2.png)
 
 
