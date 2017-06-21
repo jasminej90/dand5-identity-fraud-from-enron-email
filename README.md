@@ -26,7 +26,7 @@ A possible fix for the missing values is to replace them with 0s.
 outlier in the dataset:
 
 when I plotted bonus vs. salary, there was an outlier datapoint representing the 'TOTAL' column. I removed it as it's a spreadsheet quirk.
-![alt text]("img/scatterp1.PNG")
+![alt text]("/img/scatterp1.PNG")
 
 after removing the outlier, the scatterplot spread is clearer now as it was skewed earlier due to the effect of the outlier.
 ![alt text]("img/scatterp2.PNG")
