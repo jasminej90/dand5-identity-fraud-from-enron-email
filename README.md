@@ -1,13 +1,14 @@
 # Identity Fraud From Enron Email
 
 
-
-> 1. Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those?  [relevant rubric items: “data exploration”, “outlier investigation”]
-
+## Understanding the Dataset and Question
 
 The purpose of this project is to use machine learning tools to identify Enron employees (Persons of Interest -POI) who have committed fraud based on the public Enron financial and email dataset. Enron is an energy trading company that had the largest case of corporate fraud in US history. POIs are one of 3: indicted, settled without admitting guilt, or testified in exchange of immunity.
 
-#### Dataset Background
+> 1. Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those?  [relevant rubric items: “data exploration”, “outlier investigation”]
+
+⋅⋅*
+  ### Dataset Background
 
 The dataset contains about 146 users (18 of them are considered POIs, while 128 are non-POIs) mostly real emails exchanged by senior management of Enron. We can use machine learning on this dataset to answer questions like "can we identify patterns in the emails?", using regression we will be able to understand the relationship between the people's salary and their bonuses for example, and using clustering we can identify who was a member of the board of directors, and who is just an employee.
 
@@ -47,7 +48,8 @@ Some features have many missing values `NaN`s. Below is a list that shows each f
 A possible fix for the missing values is to replace them with 0s.
 
 
-#### Outliers
+⋅⋅*
+  ### Outliers
 
 When I plotted bonus vs. salary, there was an outlier datapoint representing the 'TOTAL' column. I removed it as it's a spreadsheet quirk.
 
@@ -59,8 +61,9 @@ After removing the outlier, the scatterplot spread is clearer now as it was skew
 
 
 
+## Optimize Feature Selection/Engineering
 
->
+
 > 2. What features did you end up using in your POI identifier, and what selection process did you use to pick them? Did you have to do any scaling? Why or why not? As part of the assignment, you should attempt to engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it. (You do not necessarily have to use it in the final analysis, only engineer and test it.) In your feature selection step, if you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like SelectKBest, please report the feature scores and reasons for your choice of parameter values.  [relevant rubric items: “create new features”, “properly scale features”, “intelligently select feature”]
 
 
@@ -90,9 +93,10 @@ for emp in my_dataset:
 	my_dataset[emp]['fraction_to_poi'] = fraction_to_poi
 ```
 
-#### Univariate Feature Selection
+⋅⋅*
+  ### Univariate Feature Selection
 
-In order to decide the best features to use, I utilized an automated feature selection function, i.e. SelectKBest, which returned back the below scores for all the features.
+In order to decide the best features to use, I utilized an automated feature selection function, i.e. SelectKBest, which selects the K features that are most powerful (where K is a parameter). The function returned the below scores for all the features.
 
 ```python
 [('exercised_stock_options', 25.097541528735491),
@@ -127,9 +131,11 @@ I decided to take the first 10 features (k = 10) along with POI as they obtained
 'total_payments', 'shared_receipt_with_poi']
 ```
 
-#### Feature Scaling
 
-Since my selected features had different units and some of the features had very big values, I needed to transform them. I used MinMaxScaler to scale all my selected features to a given range (between 0 and 1).
+⋅⋅*
+  ### Feature Scaling
+
+Since my selected features had different units and some of the features had very big values, I needed to transform them. I used MinMaxScaler from sklearn to scale all my selected features to a given range (between 0 and 1).
 
 ```python
 from sklearn import preprocessing
@@ -141,20 +147,117 @@ features = scaler.fit_transform(features)
 ```
 
 
+## Pick and Tune an Algorithm
+
 > 3. What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?  [relevant rubric item: “pick an algorithm”]
 
+I tried 5 different algorithms and ended up using `Naive Bayes` as it scored the highest evaluation metrics. Other algorithms that I tried are:
 
+	- SVM
+	- Decision Tree
+	- Random Forest
+	- Logistic Regression.
+	
+In general, it took longer to run SVM and Logistic Regression models. Also, I noticed that all algorithms scored high accuracy, which is an indication that accuracy in this case is not the best evaluation metric as one of its shortcoming that it's not ideal for skewed classes (which is the case in our enron dataset).
 
 > 4. What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well?  How did you tune the parameters of your particular algorithm? (Some algorithms do not have parameters that you need to tune -- if this is the case for the one you picked, identify and briefly explain how you would have done it for the model that was not your final choice or a different model that does utilize parameter tuning, e.g. a decision tree classifier).  [relevant rubric item: “tune the algorithm”]
 
+Most classifiers come with a set of parameters (with default values) which affect the model, and are passed as arguments to the constructor. Typical examples include `C`, `kernel` and `gamma` for SVM Classifier for example. Tuning the parameters of a classifier (usually referred to as hyperparameters) means to optimize the values of those parameters to enable the algorithm to perform its best (Hyperparameter Optimization). It's a final step in the process of applied machine learning before presenting results. If this step is not done well, it can lead to the model misfitting the data.
 
+⋅⋅*
+  ### Algorithm Tuning
+
+I used GridSearchCV from sklearn for parameter tuning in the algorithms that had parameters (SVM, Decision Tree, and Logistic Regression). Grid search is an approach to parameter tuning that will methodically build and evaluate a model for each combination of algorithm parameters specified in a grid.
+
+
+
+given a grid_search and parameters list (if exist) for a specific model, along with features and labels list,
+it tunes the algorithm using grid search and prints out the average evaluation metrics results (accuracy, percision, recall) after performing the tuning for iter times, and the best hyperparameters for the model
+
+	
+```python
+def tune_params(grid_search, features, labels, params, iters = 80):
+    acc = []
+    pre = []
+    recall = []
+    for i in range(iters):
+        features_train, features_test, labels_train, labels_test = \
+        train_test_split(features, labels, test_size = 0.3, random_state = i)
+        grid_search.fit(features_train, labels_train)
+        predicts = grid_search.predict(features_test)
+
+        acc = acc + [accuracy_score(labels_test, predicts)] 
+        pre = pre + [precision_score(labels_test, predicts)]
+        recall = recall + [recall_score(labels_test, predicts)]
+    print "accuracy: {}".format(np.mean(acc))
+    print "precision: {}".format(np.mean(pre))
+    print "recall:    {}".format(np.mean(recall))
+    
+    best_params = grid_search.best_estimator_.get_params()
+    for param_name in params.keys():
+        print("%s = %r, " % (param_name, best_params[param_name]))
+```
+
+
+**SVM **
+
+```python
+from sklearn import svm
+svm_clf = svm.SVC()
+svm_param = {'kernel':('linear', 'rbf', 'sigmoid'),
+'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
+'C': [0.1, 1, 10, 100, 1000]}
+svm_grid_search = GridSearchCV(estimator = svm_clf, param_grid = svm_param)
+
+tune_params(svm_grid_search, features, labels, svm_param)
+```
+**Result**
+kernel = 'rbf', 
+C = 1000, 
+gamma = 0.01, 
+
+
+**Decision Tree**
+
+```python
+from sklearn import svm
+svm_clf = svm.SVC()
+svm_param = {'kernel':('linear', 'rbf', 'sigmoid'),
+'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
+'C': [0.1, 1, 10, 100, 1000]}
+svm_grid_search = GridSearchCV(estimator = svm_clf, param_grid = svm_param)
+
+tune_params(svm_grid_search, features, labels, svm_param)
+```
+
+**Result**
+splitter = 'random', 
+criterion = 'gini', 
+
+**Logistic Regression model evaluation**
+
+
+```python
+```
+
+**Result**
+C = 0.1, 
+tol = 1,
+
+
+## Validate and Evaluate
 
 > 5. What is validation, and what’s a classic mistake you can make if you do it wrong? How did you validate your analysis?  [relevant rubric item: “validation strategy”]
 
 
+The classic mistake is not splitting your data to training/testing datasets.
+ 
 
 > 6. Give at least 2 evaluation metrics and your average performance for each of them.  Explain an interpretation of your metrics that says something human-understandable about your algorithm’s performance. [relevant rubric item: “usage of evaluation metrics”]
 
+Recall: True Positive / (True Positive + False Negative). Out of all the items that are truly positive, how many were correctly classified as positive. Or simply, how many positive items were 'recalled' from the dataset.
+
+Precision: True Positive / (True Positive + False Positive). Out of all the items labeled as positive, how many truly belong to the positive class.
 
 
 
@@ -162,5 +265,8 @@ features = scaler.fit_transform(features)
 
 References:
 
--[1] https://www.programiz.com/python-programming/methods/built-in/sorted
--[2] https://datascience.stackexchange.com/questions/10773/how-does-selectkbest-work
+- [1] https://www.programiz.com/python-programming/methods/built-in/sorted
+- [2] https://datascience.stackexchange.com/questions/10773/how-does-selectkbest-work
+- [3] http://machinelearningmastery.com/how-to-tune-algorithm-parameters-with-scikit-learn/
+- [4] https://en.wikipedia.org/wiki/Hyperparameter_optimization
+
