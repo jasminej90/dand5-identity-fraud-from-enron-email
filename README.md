@@ -10,15 +10,15 @@ The purpose of this project is to use machine learning tools to identify Enron e
 
 The dataset contains about 146 users (18 of them are considered POIs, while 128 are non-POIs) mostly real emails exchanged by senior management of Enron. We can use machine learning on this dataset to answer questions like "can we identify patterns in the emails?", using regression we will be able to understand the relationship between the people's salary and their bonuses for example, and using clustering we can identify who was a member of the board of directors, and who is just an employee.
 
-The dataset has 21 features, that are either financial, email or POI/non-POI)-related.
+The dataset has 21 features, that are either financial, email or (POI/non-POI)-related.
 
-**financial features**: ['salary', 'deferral_payments', 'total_payments', 'loan_advances', 'bonus', 'restricted_stock_deferred', 'deferred_income', 'total_stock_value', 'expenses', 'exercised_stock_options', 'other', 'long_term_incentive', 'restricted_stock', 'director_fees'] (all units are in US dollars)
+**financial features**: [`salary`, `deferral_payments`, `total_payments`, `loan_advances`, `bonus`, `restricted_stock_deferred`, `deferred_income`, `total_stock_value`, `expenses`, `exercised_stock_options`, `other`, `long_term_incentive`, `restricted_stock`, `director_fees`] (all units are in US dollars)
 
-**email features**: ['to_messages', 'email_address', 'from_poi_to_this_person', 'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi'] (units are generally number of emails messages; notable exception is ‘email_address’, which is a text string)
+**email features**: [`to_messages`, `email_address`, `from_poi_to_this_person`, `from_messages`, `from_this_person_to_poi`, `shared_receipt_with_poi`] (units are generally number of emails messages; notable exception is ‘email_address’, which is a text string)
 
 **POI label**: [`poi`] (boolean, represented as integer)
 
-Some features have many missing values 'NaN's. Below is a list that shows each feature and how many values it's missing:
+Some features have many missing values `NaN`s. Below is a list that shows each feature and how many values it's missing:
 ```python
 {'salary': 51,
 'to_messages': 60,
@@ -45,13 +45,17 @@ Some features have many missing values 'NaN's. Below is a list that shows each f
 
 A possible fix for the missing values is to replace them with 0s.
 
+
 > Outlier in the dataset
 
 When I plotted bonus vs. salary, there was an outlier datapoint representing the 'TOTAL' column. I removed it as it's a spreadsheet quirk.
-![scatter plot1]("https://github.com/jasminej90/dand5-identity-fraud-from-enron-email/blob/master/img/scatterp1.png")
+![scatter plot1](https://github.com/jasminej90/dand5-identity-fraud-from-enron-email/blob/master/img/scatterp1.png)
 
 After removing the outlier, the scatterplot spread is clearer now as it was skewed earlier due to the effect of the outlier.
-![scatter plot2]("https://github.com/jasminej90/dand5-identity-fraud-from-enron-email/blob/master/img/scatterp2.png")
+![scatter plot2](https://github.com/jasminej90/dand5-identity-fraud-from-enron-email/blob/master/img/scatterp2.png)
+
+
+
 
 #### 2. What features did you end up using in your POI identifier, and what selection process did you use to pick them? Did you have to do any scaling? Why or why not? As part of the assignment, you should attempt to engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it. (You do not necessarily have to use it in the final analysis, only engineer and test it.) In your feature selection step, if you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like SelectKBest, please report the feature scores and reasons for your choice of parameter values.  [relevant rubric items: “create new features”, “properly scale features”, “intelligently select feature”]
 
