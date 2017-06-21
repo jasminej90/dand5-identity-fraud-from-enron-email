@@ -130,6 +130,13 @@ print 'SelectKBest scores: ', sorted_scores
 kBest_features = POI_label + [(i[0]) for i in sorted_scores[0:10]]
 print 'KBest', kBest_features
 
+from sklearn import preprocessing
+
+data = featureFormat(my_dataset, kBest_features, sort_keys = True)
+labels, features = targetFeatureSplit(data)
+scaler = preprocessing.MinMaxScaler()
+features = scaler.fit_transform(features)
+
 ### Task 4: Try a varity of classifiers
 ### Please name your classifier clf for easy export below.
 ### Note that if you want to do PCA or other multi-stage operations,
