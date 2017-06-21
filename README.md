@@ -61,6 +61,81 @@ After removing the outlier, the scatterplot spread is clearer now as it was skew
 
 #### 2. What features did you end up using in your POI identifier, and what selection process did you use to pick them? Did you have to do any scaling? Why or why not? As part of the assignment, you should attempt to engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it. (You do not necessarily have to use it in the final analysis, only engineer and test it.) In your feature selection step, if you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like SelectKBest, please report the feature scores and reasons for your choice of parameter values.  [relevant rubric items: “create new features”, “properly scale features”, “intelligently select feature”]
 
+I created two new features which I added to my original features_list and passed it to SelectKBest function for features selection. The two features I created are: `fraction_from_poi`, which represents the ratio of the messages from POI to this person against all the messages sent to this person, and `fraction_to_poi`, ratio from this person to POI against all messages from this person.
+
+This code computes the fraction of messages to/from that person that are from/to a POI, given a number of messages to/from POI (numerator) and number of all messages to/from a person (denominator).
+
+```python
+def computeFraction(poi_messages, all_messages):
+	fraction = 0
+	if poi_messages != 'NaN' and all_messages != 'NaN':
+		fraction = poi_messages/float(all_messages)
+```
+
+I used the above function then to calculate the fraction for each employee in my dataset, and added the new features to my original dataset.
+
+```python
+for emp in my_dataset:
+	from_poi_to_this_person = my_dataset[emp]['from_poi_to_this_person']
+	to_messages = my_dataset[emp]['to_messages']
+	fraction_from_poi = computeFraction(from_poi_to_this_person, to_messages)
+	my_dataset[emp]['fraction_from_poi'] = fraction_from_poi
+
+	from_this_person_to_poi = my_dataset[emp]['from_this_person_to_poi']
+	from_messages = my_dataset[emp]['from_messages']
+	fraction_to_poi = computeFraction(from_this_person_to_poi, from_messages)
+	my_dataset[emp]['fraction_to_poi'] = fraction_to_poi
+```
+
+> Feature selection
+
+In order to decide the best features to use, I utilized an automated feature selection function, i.e. SelectKBest, which returned back the below scores for all the features.
+
+```python
+[('exercised_stock_options', 25.097541528735491),
+('total_stock_value', 24.467654047526398),
+('bonus', 21.060001707536571),
+('salary', 18.575703268041785),
+('fraction_to_poi', 16.641707070468989),
+('deferred_income', 11.595547659730601),
+('long_term_incentive', 10.072454529369441),
+('restricted_stock', 9.3467007910514877),
+('total_payments', 8.8667215371077717),
+('shared_receipt_with_poi', 8.7464855321290802),
+('loan_advances', 7.2427303965360181),
+('expenses', 6.2342011405067401),
+('from_poi_to_this_person', 5.3449415231473374),
+('other', 4.204970858301416),
+('fraction_from_poi', 3.2107619169667441),
+('from_this_person_to_poi', 2.4265081272428781),
+('director_fees', 2.1076559432760908),
+('to_messages', 1.6988243485808501),
+('deferral_payments', 0.2170589303395084),
+('from_messages', 0.16416449823428736),
+('restricted_stock_deferred', 0.06498431172371151)]
+```
+
+I decided to take the first 10 features (k = 10) along with POI as they obtained the highest scores from SelectKBest results. You can notice that one of my engineered features recevied a high score and so I included it in my final features list.
+
+```python
+# KBest Features
+['poi', 'exercised_stock_options', 'total_stock_value', 'bonus', 'salary',
+'fraction_to_poi', 'deferred_income', 'long_term_incentive', 'restricted_stock',
+'total_payments', 'shared_receipt_with_poi']
+```
+
+> Feature scaling
+
+Since my selected features had different units and some of the features had very big values, I needed to transform them. I used MinMaxScaler to scale all my selected features to a given range (between 0 and 1).
+
+```python
+from sklearn import preprocessing
+
+data = featureFormat(my_dataset, kBest_features, sort_keys = True)
+labels, features = targetFeatureSplit(data)
+scaler = preprocessing.MinMaxScaler()
+features = scaler.fit_transform(features)
+```
 
 
 #### 3. What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?  [relevant rubric item: “pick an algorithm”]
