@@ -4,9 +4,10 @@
 
 > 1. Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those?  [relevant rubric items: “data exploration”, “outlier investigation”]
 
+
 The purpose of this project is to use machine learning tools to identify Enron employees (Persons of Interest -POI) who have committed fraud based on the public Enron financial and email dataset. Enron is an energy trading company that had the largest case of corporate fraud in US history. POIs are one of 3: indicted, settled without admitting guilt, or testified in exchange of immunity.
 
-##### Dataset Background
+#### Dataset Background
 
 The dataset contains about 146 users (18 of them are considered POIs, while 128 are non-POIs) mostly real emails exchanged by senior management of Enron. We can use machine learning on this dataset to answer questions like "can we identify patterns in the emails?", using regression we will be able to understand the relationship between the people's salary and their bonuses for example, and using clustering we can identify who was a member of the board of directors, and who is just an employee.
 
@@ -46,7 +47,7 @@ Some features have many missing values `NaN`s. Below is a list that shows each f
 A possible fix for the missing values is to replace them with 0s.
 
 
-##### Outliers
+#### Outliers
 
 When I plotted bonus vs. salary, there was an outlier datapoint representing the 'TOTAL' column. I removed it as it's a spreadsheet quirk.
 
@@ -59,6 +60,7 @@ After removing the outlier, the scatterplot spread is clearer now as it was skew
 
 
 
+>
 > 2. What features did you end up using in your POI identifier, and what selection process did you use to pick them? Did you have to do any scaling? Why or why not? As part of the assignment, you should attempt to engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it. (You do not necessarily have to use it in the final analysis, only engineer and test it.) In your feature selection step, if you used an algorithm like a decision tree, please also give the feature importances of the features that you use, and if you used an automated feature selection function like SelectKBest, please report the feature scores and reasons for your choice of parameter values.  [relevant rubric items: “create new features”, “properly scale features”, “intelligently select feature”]
 
 
@@ -88,7 +90,7 @@ for emp in my_dataset:
 	my_dataset[emp]['fraction_to_poi'] = fraction_to_poi
 ```
 
-##### Univariate Feature Selection
+#### Univariate Feature Selection
 
 In order to decide the best features to use, I utilized an automated feature selection function, i.e. SelectKBest, which returned back the below scores for all the features.
 
@@ -125,7 +127,7 @@ I decided to take the first 10 features (k = 10) along with POI as they obtained
 'total_payments', 'shared_receipt_with_poi']
 ```
 
-##### Feature Scaling
+#### Feature Scaling
 
 Since my selected features had different units and some of the features had very big values, I needed to transform them. I used MinMaxScaler to scale all my selected features to a given range (between 0 and 1).
 
@@ -159,5 +161,6 @@ features = scaler.fit_transform(features)
 ---
 
 References:
-[1] https://www.programiz.com/python-programming/methods/built-in/sorted
-[2] https://datascience.stackexchange.com/questions/10773/how-does-selectkbest-work
+
+-[1] https://www.programiz.com/python-programming/methods/built-in/sorted
+-[2] https://datascience.stackexchange.com/questions/10773/how-does-selectkbest-work
