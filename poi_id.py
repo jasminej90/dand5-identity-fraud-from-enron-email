@@ -30,8 +30,8 @@ print 'Total number of data points = ', len(data_dict)
 # allocation across classes (POI/non-POI)
 poi_count = 0
 for employee in data_dict:
-	if data_dict[employee]['poi'] == True:
-		poi_count += 1
+    if data_dict[employee]['poi'] == True:
+        poi_count += 1
 print 'number of POI = ', poi_count
 print 'number of non-POI = ', len(data_dict) - poi_count
 
@@ -42,31 +42,31 @@ print 'number of features used = ', len(features_list), 'which are: ', features_
 # are there features with many missing values? etc.
 missing_values = {}
 for feat in total_features:
-	missing_values[feat] = 0
+    missing_values[feat] = 0
 
 for emp in data_dict:
-	for f in data_dict[emp]:
-		if data_dict[emp][f] == 'NaN':
-			missing_values[f] += 1
-			# fill NaN values
-			# data_dict[emp][f] = 0
+    for f in data_dict[emp]:
+        if data_dict[emp][f] == 'NaN':
+            missing_values[f] += 1
+            # fill NaN values
+            # data_dict[emp][f] = 0
 
 print 'missing values: ', missing_values
 
 ### Task 2: Remove outliers
 
 def show_scatter_plot(dataset, feature1, feature2):
-	""" given two features, create a 2D scatter plot
-	"""
-	data = featureFormat(dataset, [feature1, feature2])
-	for p in data:
-		x = p[0]
-		y = p[1]
-		plt.scatter(x, y)
+    """ given two features, create a 2D scatter plot
+    """
+    data = featureFormat(dataset, [feature1, feature2])
+    for p in data:
+        x = p[0]
+        y = p[1]
+        plt.scatter(x, y)
 
-	plt.xlabel(feature1)
-	plt.ylabel(feature2)
-	plt.show()
+    plt.xlabel(feature1)
+    plt.ylabel(feature2)
+    plt.show()
 
 # identify outliers
 # show_scatter_plot(data_dict, "salary", "bonus")
@@ -81,33 +81,33 @@ my_dataset = data_dict
 
 # create new features
 def computeFraction(poi_messages, all_messages):
-	""" given a number messages to/from POI (numerator) 
-	and number of all messages to/from a person (denominator),
-	return the fraction of messages to/from that person
-	that are from/to a POI
-	"""
-	fraction = 0
-	if poi_messages != 'NaN' and all_messages != 'NaN':
-		fraction = poi_messages/float(all_messages)
+    """ given a number messages to/from POI (numerator) 
+    and number of all messages to/from a person (denominator),
+    return the fraction of messages to/from that person
+    that are from/to a POI
+    """
+    fraction = 0
+    if poi_messages != 'NaN' and all_messages != 'NaN':
+        fraction = poi_messages/float(all_messages)
 
-   	return fraction
+    return fraction
 
 def takeSecond(elem):
-	""" take second element for sort
-	"""
-	return elem[1]
+    """ take second element for sort
+    """
+    return elem[1]
 
 for emp in my_dataset:
-	from_poi_to_this_person = my_dataset[emp]['from_poi_to_this_person']
-	to_messages = my_dataset[emp]['to_messages']
-	fraction_from_poi = computeFraction(from_poi_to_this_person, to_messages)
-	# print fraction_from_poi
-	my_dataset[emp]['fraction_from_poi'] = fraction_from_poi
+    from_poi_to_this_person = my_dataset[emp]['from_poi_to_this_person']
+    to_messages = my_dataset[emp]['to_messages']
+    fraction_from_poi = computeFraction(from_poi_to_this_person, to_messages)
+    # print fraction_from_poi
+    my_dataset[emp]['fraction_from_poi'] = fraction_from_poi
 
-	from_this_person_to_poi = my_dataset[emp]['from_this_person_to_poi']
-	from_messages = my_dataset[emp]['from_messages']
-	fraction_to_poi = computeFraction(from_this_person_to_poi, from_messages)
-	my_dataset[emp]['fraction_to_poi'] = fraction_to_poi
+    from_this_person_to_poi = my_dataset[emp]['from_this_person_to_poi']
+    from_messages = my_dataset[emp]['from_messages']
+    fraction_to_poi = computeFraction(from_this_person_to_poi, from_messages)
+    my_dataset[emp]['fraction_to_poi'] = fraction_to_poi
 
 features_list_n = total_features
 features_list_n.remove('email_address')
@@ -130,21 +130,27 @@ kBest_features = POI_label + [(i[0]) for i in sorted_scores[0:10]]
 print 'KBest', kBest_features
 
 for emp in data_dict:
-	for f in data_dict[emp]:
-		if data_dict[emp][f] == 'NaN':
-			# fill NaN values
-			data_dict[emp][f] = 0
+    for f in data_dict[emp]:
+        if data_dict[emp][f] == 'NaN':
+            # fill NaN values
+            data_dict[emp][f] = 0
 
 my_dataset = data_dict
 
-from sklearn import preprocessing
+kBest_features.remove('fraction_to_poi')
 
+# dataset without new features
+from sklearn import preprocessing
 data = featureFormat(my_dataset, kBest_features, sort_keys = True)
 labels, features = targetFeatureSplit(data)
 scaler = preprocessing.MinMaxScaler()
 features = scaler.fit_transform(features)
 
-
+# dataset with new features
+kBest_new_features = kBest_features + ['fraction_from_poi', 'fraction_to_poi']
+data = featureFormat(my_dataset, kBest_new_features, sort_keys = True)
+new_labels, new_features = targetFeatureSplit(data)
+new_features = scaler.fit_transform(new_features)
 
 ### Task 4: Try a varity of classifiers
 ### Please name your classifier clf for easy export below.
@@ -252,6 +258,8 @@ nb_param = {}
 nb_grid_search = GridSearchCV(estimator = nb_clf, param_grid = nb_param)
 print("Naive Bayes model evaluation")
 tune_params(nb_grid_search, features, labels, nb_param)
+# tune_params(nb_grid_search, new_features, new_labels, nb_param)
+
 
 # 2. Support Vector Machines
 from sklearn import svm
@@ -262,7 +270,9 @@ svm_param = {'kernel':('linear', 'rbf', 'sigmoid'),
 svm_grid_search = GridSearchCV(estimator = svm_clf, param_grid = svm_param)
 
 print("SVM model evaluation")
-tune_params(svm_grid_search, features, labels, svm_param)
+# tune_params(svm_grid_search, features, labels, svm_param)
+# tune_params(svm_grid_search, new_features, new_labels, svm_param)
+
 
 # 3. Decision Tree
 from sklearn import tree
@@ -272,7 +282,8 @@ dt_param = {'criterion':('gini', 'entropy'),
 dt_grid_search = GridSearchCV(estimator = dt_clf, param_grid = dt_param)
 
 print("Decision Tree model evaluation")
-tune_params(dt_grid_search, features, labels, dt_param)
+# tune_params(dt_grid_search, features, labels, dt_param)
+# tune_params(dt_grid_search, new_features, new_labels, dt_param)
 
 # 4. Random Forest
 from sklearn.ensemble import RandomForestClassifier
@@ -281,7 +292,8 @@ rf_param = {}
 rf_grid_search = GridSearchCV(estimator = rf_clf, param_grid = rf_param)
 
 print("Random Forest model evaluation")
-tune_params(rf_grid_search, features, labels, rf_param)
+# tune_params(rf_grid_search, features, labels, rf_param)
+# tune_params(rf_grid_search, new_features, new_labels, rf_param)
 
 # 5. Logistic Regression
 from sklearn.linear_model import LogisticRegression
@@ -291,7 +303,8 @@ lr_param = {'tol': [1, 0.1, 0.01, 0.001, 0.0001],
 lr_grid_search = GridSearchCV(estimator = lr_clf, param_grid = lr_param)
 
 print("Logistic Regression model evaluation")
-tune_params(lr_grid_search, features, labels, lr_param)
+# tune_params(lr_grid_search, features, labels, lr_param)
+# tune_params(lr_grid_search, new_features, new_labels, lr_param)
 
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
@@ -306,58 +319,58 @@ from sklearn.cross_validation import train_test_split
 features_train, features_test, labels_train, labels_test = \
     train_test_split(features, labels, test_size=0.3, random_state=42)
 
-from sklearn.cross_validation import StratifiedShuffleSplit
-def test_classifier(clf, dataset, feature_list, folds = 1000):
-    data = featureFormat(dataset, feature_list, sort_keys = True)
-    labels, features = targetFeatureSplit(data)
-    cv = StratifiedShuffleSplit(labels, folds, random_state = 42)
-    true_negatives = 0
-    false_negatives = 0
-    true_positives = 0
-    false_positives = 0
-    for train_idx, test_idx in cv: 
-        features_train = []
-        features_test  = []
-        labels_train   = []
-        labels_test    = []
-        for ii in train_idx:
-            features_train.append( features[ii] )
-            labels_train.append( labels[ii] )
-        for jj in test_idx:
-            features_test.append( features[jj] )
-            labels_test.append( labels[jj] )
+# from sklearn.cross_validation import StratifiedShuffleSplit
+# def test_classifier(clf, dataset, feature_list, folds = 1000):
+#     data = featureFormat(dataset, feature_list, sort_keys = True)
+#     labels, features = targetFeatureSplit(data)
+#     cv = StratifiedShuffleSplit(labels, folds, random_state = 42)
+#     true_negatives = 0
+#     false_negatives = 0
+#     true_positives = 0
+#     false_positives = 0
+#     for train_idx, test_idx in cv: 
+#         features_train = []
+#         features_test  = []
+#         labels_train   = []
+#         labels_test    = []
+#         for ii in train_idx:
+#             features_train.append( features[ii] )
+#             labels_train.append( labels[ii] )
+#         for jj in test_idx:
+#             features_test.append( features[jj] )
+#             labels_test.append( labels[jj] )
         
-        ### fit the classifier using training set, and test on test set
-        clf.fit(features_train, labels_train)
-        predictions = clf.predict(features_test)
-        for prediction, truth in zip(predictions, labels_test):
-            if prediction == 0 and truth == 0:
-                true_negatives += 1
-            elif prediction == 0 and truth == 1:
-                false_negatives += 1
-            elif prediction == 1 and truth == 0:
-                false_positives += 1
-            elif prediction == 1 and truth == 1:
-                true_positives += 1
-            else:
-                print ("Warning: Found a predicted label not == 0 or 1.")
-                print ("All predictions should take value 0 or 1.")
-                print ("Evaluating performance for processed predictions:")
-                break
-    try:
-        total_predictions = true_negatives + false_negatives + false_positives + true_positives
-        accuracy = 1.0*(true_positives + true_negatives)/total_predictions
-        precision = 1.0*true_positives/(true_positives+false_positives)
-        recall = 1.0*true_positives/(true_positives+false_negatives)
-        f1 = 2.0 * true_positives/(2*true_positives + false_positives+false_negatives)
-        f2 = (1+2.0*2.0) * precision*recall/(4*precision + recall)
-        print (clf)
-        print (PERF_FORMAT_STRING.format(accuracy, precision, recall, f1, f2, display_precision = 5))
-        print (RESULTS_FORMAT_STRING.format(total_predictions, true_positives, false_positives, false_negatives, true_negatives))
-        print ("")
-    except:
-        print ("Got a divide by zero when trying out:", clf)
-        print ("Precision or recall may be undefined due to a lack of true positive predicitons.")
+#         ### fit the classifier using training set, and test on test set
+#         clf.fit(features_train, labels_train)
+#         predictions = clf.predict(features_test)
+#         for prediction, truth in zip(predictions, labels_test):
+#             if prediction == 0 and truth == 0:
+#                 true_negatives += 1
+#             elif prediction == 0 and truth == 1:
+#                 false_negatives += 1
+#             elif prediction == 1 and truth == 0:
+#                 false_positives += 1
+#             elif prediction == 1 and truth == 1:
+#                 true_positives += 1
+#             else:
+#                 print ("Warning: Found a predicted label not == 0 or 1.")
+#                 print ("All predictions should take value 0 or 1.")
+#                 print ("Evaluating performance for processed predictions:")
+#                 break
+#     try:
+#         total_predictions = true_negatives + false_negatives + false_positives + true_positives
+#         accuracy = 1.0*(true_positives + true_negatives)/total_predictions
+#         precision = 1.0*true_positives/(true_positives+false_positives)
+#         recall = 1.0*true_positives/(true_positives+false_negatives)
+#         f1 = 2.0 * true_positives/(2*true_positives + false_positives+false_negatives)
+#         f2 = (1+2.0*2.0) * precision*recall/(4*precision + recall)
+#         print (clf)
+#         print (PERF_FORMAT_STRING.format(accuracy, precision, recall, f1, f2, display_precision = 5))
+#         print (RESULTS_FORMAT_STRING.format(total_predictions, true_positives, false_positives, false_negatives, true_negatives))
+#         print ("")
+#     except:
+#         print ("Got a divide by zero when trying out:", clf)
+#         print ("Precision or recall may be undefined due to a lack of true positive predicitons.")
 
 
 clf = nb_clf
@@ -371,4 +384,3 @@ features_list = kBest_features
 ### generates the necessary .pkl files for validating your results.
 
 dump_classifier_and_data(clf, my_dataset, features_list)
-
