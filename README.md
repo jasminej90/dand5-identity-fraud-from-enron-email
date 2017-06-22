@@ -120,7 +120,7 @@ In order to decide the best features to use, I utilized an automated feature sel
 ('restricted_stock_deferred', 0.06498431172371151)]
 ```
 
-In order to obsereve the effect of adding my new engineered features, I looked at the performance of each algorithm with the original best features (new new features added), then with adding the new features.
+In order to obsereve the effect of adding my new engineered features, I looked at the performance of each algorithm with the original best features (excluding new features), and compared it with the performance while adding the new features.
 
 Algorithm | precision | recall | precision | recall 
 |:-:|:-:|:-:|:-:|:-:|
