@@ -56,7 +56,9 @@ print 'missing values: ', missing_values
 ### Task 2: Remove outliers
 
 def show_scatter_plot(dataset, feature1, feature2):
-    """ given two features, create a 2D scatter plot
+    """ given two features feature1 (x) and feature2 (y),
+    this function creates a 2D scatter plot showing
+    both x and y
     """
     data = featureFormat(dataset, [feature1, feature2])
     for p in data:
