@@ -120,23 +120,29 @@ In order to decide the best features to use, I utilized an automated feature sel
 ('restricted_stock_deferred', 0.06498431172371151)]
 ```
 
-I decided to take the first 10 features (k = 10) along with POI as they obtained the highest scores from SelectKBest results. You can notice that one of my engineered features recevied a high score and so I included it in my final features list.
-
-```python
-# KBest Features
-['poi', 'exercised_stock_options', 'total_stock_value', 'bonus', 'salary',
-'fraction_to_poi', 'deferred_income', 'long_term_incentive', 'restricted_stock',
-'total_payments', 'shared_receipt_with_poi']
-```
-
+In order to obsereve the effect of adding my new engineered features, I looked at the performance of each algorithm with the original best features (new new features added), then with adding the new features.
 
 Algorithm | precision | recall | precision | recall 
 |:-:|:-:|:-:|:-:|:-:|
-| `original_features` | `original_features` | `new_features` | `new_features`
+|| `original_features` | `original_features` | `new_features` | `new_features`
 Naive Bayes | 0.401150793651 | 0.337827380952 | 0.396896194084 |0.332306547619
+SVM | 0.225744047619 | 0.0862450396825 | 0.163958333333 | 0.0596775793651
+Decision Tree| 0.260725975413 |  0.294226190476 | 0.315334145022 | 0.312609126984
+Random Forest| 0.327291666667 | 0.140173611111 |  0.349404761905 | 0.148764880952
+Logistic Regression| 0.0 | 0.0 | 0.0 | 0.0 
 
+You can notice that the performance differs from one algorithm to another. Some algorithms perform better while including the new features, e.g. Decision Tree and Random Forest. Some algorithms performs worse with the new features included, e.g. Naive Bayes and SVM.
 
+I decided to take the first 10 features (k = 10) along with POI as they obtained the highest scores from SelectKBest results. Even though one of my engineered features recevied a high score, I did not include it in my final features list as the best model performance was obtained while excluding it (Naive Bayes, above table).
 
+```python
+# KBest Features
+
+['poi', 'exercised_stock_options', 'total_stock_value', 'bonus', 'salary',
+'deferred_income', 'long_term_incentive', 'restricted_stock', 'total_payments',
+'shared_receipt_with_poi']
+
+```
 
   * ### Feature Scaling
 
@@ -228,7 +234,13 @@ tune_params(dt_grid_search, features, labels, dt_param)
 
 **Result**
 
+without new features:
+
 splitter = 'random', criterion = 'gini'
+
+with new features:
+
+splitter = 'best', criterion = 'entropy'
 
 
 **Tuning Logistic Regression Classification**
