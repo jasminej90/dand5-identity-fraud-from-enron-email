@@ -129,10 +129,12 @@ I decided to take the first 10 features (k = 10) along with POI as they obtained
 'total_payments', 'shared_receipt_with_poi']
 ```
 
- |  <td colspan=2> original_features | <td colspan=2> new_features|
+
 algorithm | precision | recall | precision | recall |
+algorithm |<td colspan=2> original_features|<td colspan=2> new_features|
 |---|---|---|---|---|
 Naive Bayes | 0.401150793651 | 0.337827380952 | 0.396896194084 |0.332306547619
+
 
 
 
