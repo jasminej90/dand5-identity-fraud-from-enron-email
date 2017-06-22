@@ -131,8 +131,8 @@ I decided to take the first 10 features (k = 10) along with POI as they obtained
 
 
 Algorithm | precision | recall | precision | recall 
-|---|---|---|---|---|
-|<td colspan=2> **original_features** <td colspan=2> **new_features**
+|:-:|:-:|:-:|:-:|:-:|
+| `original_features` | `original_features` | `new_features` | `new_features`
 Naive Bayes | 0.401150793651 | 0.337827380952 | 0.396896194084 |0.332306547619
 
 
